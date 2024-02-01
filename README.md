@@ -1,4 +1,6 @@
-srds_rwanda
+srds
+formated scoring model
+
 ==============================
 
 A short description of the project.
