@@ -1,0 +1,30 @@
+interim_data_config:
+  interim_data_path : data/interim/cleaned_analysis_data.csv
+  
+  
+raw_data_config:
+    previous_limits_csv : data/raw/previous_scoring_summaries.csv
+    scoring_data_csv : data/raw/scoring_data.csv
+  
+external_data_config:
+  external_data_path : /home/jupyter-jackline.ngenia/jupyter-notebooks/projects/rw_srds_bralirwa/data/external/
+  
+processed_data_config:
+  processed_scoring_summaries_data_path : data/processed/processed_scoring_summaries.csv
+  processed_summaries_with_limits_path : data/processed/processed_scoring_summaries_with_limits.csv
+  
+  
+business_rules:
+  limit_factor_14_day_product : 0.35
+  rwandese_franc_base_rate : 1020
+  minimum_trading_consistency_threshold : 0.8
+  minimum_age_on_network : 6
+  maximum_allowed_recency_in_months : 3
+  
+  
+mlflow_config:
+  artifacts_dir: artifacts
+  experiment_name: rw_srds_model_iteration1
+  run_name: rw_srds_batch_scoring
+  registered_model_name: rw_srds_batch_scoring_model
+  remote_server_uri: https://mlflow.asantefsg.com/

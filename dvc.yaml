@@ -1,0 +1,49 @@
+stages:
+  a_load_data_service:
+    cmd: python src/data/load_data.py --config=params.yaml
+    deps:
+    - src/data/load_data.py
+    outs:
+
+    - data/raw/previous_scoring_summaries.csv
+    - data/raw/scoring_data.csv
+  
+  b_build_features_service:
+    cmd: python src/features/build_features.py --config=params.yaml
+    deps:
+    - src/features/build_features.py
+
+    - data/raw/scoring_data.csv
+    #- data/interim/cleaned_analysis_data.csv
+    outs:
+    - data/processed/processed_scoring_summaries.csv
+
+  c_prediction_service:
+    cmd: python src/models/predict_model.py --config=params.yaml
+    always_changed: true
+    deps:
+    - src/models/predict_model.py
+    - data/processed/processed_scoring_summaries.csv
+    - data/raw/previous_scoring_summaries.csv
+    outs:
+    - data/processed/processed_scoring_summaries_with_limits.csv
+    
+  # d_post_scoring_summaries_to_db_service:
+  #   cmd: python src/models/post_scoring_summaries_to_db.py --config=params.yaml
+  #   always_changed: true
+  #   deps:
+  #   - src/models/post_scoring_summaries_to_db.py
+  #   - data/processed/processed_scoring_summaries_with_limits.csv
+    
+  # e_post_scoring_results_to_db_service:
+  #   cmd: python src/models/post_scoring_results_to_db.py --config=params.yaml
+  #   always_changed: true
+  #   deps:
+  #   - src/models/post_scoring_results_to_db.py
+  #   - data/processed/processed_scoring_summaries_with_limits.csv 
+    
+  # f_push_limits_to_pronto_service:
+  #   cmd: python src/models/push_limits_to_pronto.py --config=params.yaml
+  #   always_changed: true
+  #   deps:
+  #   - src/models/push_limits_to_pronto.py 

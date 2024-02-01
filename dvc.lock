@@ -1,0 +1,122 @@
+schema: '2.0'
+stages:
+  a_raw_dataset_creation:
+    cmd: python src/data/load_data.py --config=params.yaml
+    deps:
+    - path: data/external/SALES BY CUSTOMER AND BY DAY Feb 2022 - July 2022.xlsx
+      md5: 0350f555358b399e94325c75d5afde1e
+      size: 33900
+    - path: data/external/SRDS SALES BY CUSTOMER AND BY DAY Jan 2020 - Jan 2022.xlsx
+      md5: 6805360a3dc48defb2a994187c7cfe23
+      size: 138609
+    - path: data/external/srds_customer_identity_adjustment_20220509.xlsx
+      md5: 628bb7a8b26feaf38094ebfa7dbebc55
+      size: 20834
+    - path: src/data/load_data.py
+      md5: 2abaac7bec9f3f405a3101e873d8d9b3
+      size: 2825
+    outs:
+    - path: data/processed/cleaned_analysis_data.csv
+      md5: 2e937808bc7758096e86a51624ef93cb
+      size: 58772
+    - path: data/processed/cleaned_analysis_data_1.csv
+      md5: a5219723efde43d76a5065a4b6148b65
+      size: 7022
+    - path: data/processed/proxy_ids.csv
+      md5: 0b7d2db9baa3e9ef08cfa25c6697153f
+      size: 579
+  b_data_prep:
+    cmd: python src/features/build_features.py --config=params.yaml
+    deps:
+    - path: data/processed/cleaned_analysis_data.csv
+      md5: 2e937808bc7758096e86a51624ef93cb
+      size: 58772
+    - path: data/processed/cleaned_analysis_data_1.csv
+      md5: a5219723efde43d76a5065a4b6148b65
+      size: 7022
+    - path: data/processed/proxy_ids.csv
+      md5: 0b7d2db9baa3e9ef08cfa25c6697153f
+      size: 579
+    - path: src/features/build_features.py
+      md5: 32db922ed6508fee54d8e0938b4c3369
+      size: 5004
+    outs:
+    - path: data/processed/data_with_summaries.csv
+      md5: 318b201b4c652f32c7720238b8342ff2
+      size: 1855
+  c_prediction_service:
+    cmd: python src/models/predict_model.py --config=params.yaml
+    deps:
+    - path: data/processed/processed_scoring_summaries.csv
+      hash: md5
+      md5: 3e47540b6cb544a5df7621a78576b2b5
+      size: 8337
+    - path: data/raw/previous_scoring_summaries.csv
+      hash: md5
+      md5: 595a9cdac2152ab669c04d6e6c35424f
+      size: 2008
+    - path: src/models/predict_model.py
+      hash: md5
+      md5: 22fdaac8b7d02fbaac3ee61afe1f656a
+      size: 12811
+    outs:
+    - path: data/processed/processed_scoring_summaries_with_limits.csv
+      hash: md5
+      md5: 7eff63aa948d802b46cd71bc59777a7e
+      size: 3304
+  b_build_features_service:
+    cmd: python src/features/build_features.py --config=params.yaml
+    deps:
+    - path: data/raw/scoring_data.csv
+      hash: md5
+      md5: be333baf2281f988c4792eee25f6ade5
+      size: 2690769
+    - path: src/features/build_features.py
+      hash: md5
+      md5: fde810b655d4d71a536910070a1e0742
+      size: 5078
+    outs:
+    - path: data/processed/processed_scoring_summaries.csv
+      hash: md5
+      md5: 3e47540b6cb544a5df7621a78576b2b5
+      size: 8337
+  a_load_data_service:
+    cmd: python src/data/load_data.py --config=params.yaml
+    deps:
+    - path: src/data/load_data.py
+      hash: md5
+      md5: 057edc86e95d9faae13f32f07f8360c9
+      size: 2394
+    outs:
+    - path: data/raw/previous_scoring_summaries.csv
+      hash: md5
+      md5: 595a9cdac2152ab669c04d6e6c35424f
+      size: 2008
+    - path: data/raw/scoring_data.csv
+      hash: md5
+      md5: be333baf2281f988c4792eee25f6ade5
+      size: 2690769
+  f_push_limits_to_pronto_service:
+    cmd: python src/models/push_limits_to_pronto.py --config=params.yaml
+    deps:
+    - path: src/models/push_limits_to_pronto.py
+      md5: 3042be4ae493791e3fcdb4fe567c6c8f
+      size: 1106
+  d_post_scoring_summaries_to_db_service:
+    cmd: python src/models/post_scoring_summaries_to_db.py --config=params.yaml
+    deps:
+    - path: data/processed/processed_scoring_summaries_with_limits.csv
+      md5: 41a36ef6aff2c66494fe22684d3dd62c
+      size: 8150
+    - path: src/models/post_scoring_summaries_to_db.py
+      md5: b3cc167436d817f403b4469a3977865c
+      size: 2326
+  e_post_scoring_results_to_db_service:
+    cmd: python src/models/post_scoring_results_to_db.py --config=params.yaml
+    deps:
+    - path: data/processed/processed_scoring_summaries_with_limits.csv
+      md5: 41a36ef6aff2c66494fe22684d3dd62c
+      size: 8150
+    - path: src/models/post_scoring_results_to_db.py
+      md5: 9cdb2a089af13cf3f84282de20194673
+      size: 4537
